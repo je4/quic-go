@@ -31,6 +31,8 @@ type connIDManager struct {
 	removeStatelessResetToken func(protocol.StatelessResetToken)
 	retireStatelessResetToken func(protocol.StatelessResetToken)
 	queueControlFrame         func(wire.Frame)
+
+	logger utils.Logger
 }
 
 func newConnIDManager(
@@ -39,6 +41,7 @@ func newConnIDManager(
 	removeStatelessResetToken func(protocol.StatelessResetToken),
 	retireStatelessResetToken func(protocol.StatelessResetToken),
 	queueControlFrame func(wire.Frame),
+	logger utils.Logger,
 ) *connIDManager {
 	b := make([]byte, 8)
 	_, _ = rand.Read(b) // ignore the error here. Nothing bad will happen if the seed is not perfectly random.
@@ -50,6 +53,7 @@ func newConnIDManager(
 		retireStatelessResetToken: retireStatelessResetToken,
 		queueControlFrame:         queueControlFrame,
 		rand:                      mrand.New(mrand.NewSource(seed)),
+		logger:                    logger,
 	}
 }
 
@@ -155,6 +159,7 @@ func (h *connIDManager) updateConnectionID() {
 	front := h.queue.Remove(h.queue.Front())
 	h.activeSequenceNumber = front.SequenceNumber
 	h.activeConnectionID = front.ConnectionID
+	h.logger.Debugf("Updating connection ID to %s (seq: %d)", h.activeConnectionID, h.activeSequenceNumber)
 	h.activeStatelessResetToken = &front.StatelessResetToken
 	h.packetsSinceLastChange = 0
 	h.packetsPerConnectionID = protocol.PacketsPerConnectionID/2 + uint64(h.rand.Int63n(protocol.PacketsPerConnectionID))

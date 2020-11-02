@@ -260,6 +260,7 @@ var newSession = func(
 		runner.RemoveResetToken,
 		runner.RetireResetToken,
 		s.queueControlFrame,
+		s.logger,
 	)
 	s.connIDGenerator = newConnIDGenerator(
 		srcConnID,
@@ -384,6 +385,7 @@ var newClientSession = func(
 		runner.RemoveResetToken,
 		runner.RetireResetToken,
 		s.queueControlFrame,
+		s.logger,
 	)
 	s.connIDGenerator = newConnIDGenerator(
 		srcConnID,
